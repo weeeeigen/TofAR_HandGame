@@ -59,6 +59,9 @@ public class AppController : MonoBehaviour
     private Sprite[] jankenImages = new Sprite[Enum.GetNames(typeof(Janken)).Length];
 
     [SerializeField]
+    private PistolImage[] pistolImages;
+
+    [SerializeField]
     private GameObject sunglassImage;
 
     [SerializeField]
@@ -102,20 +105,25 @@ public class AppController : MonoBehaviour
 
         introText.text = initIntro;
 
+        UpdatePistol(false);
+
         TofArHandManager.OnGestureEstimated += OnGestureEstimated;
     }
 
     private void ResultPanelAction(ResultPanel.Action action)
     {
         resultPanel.Show(false);
+        
+        // Reset
         pitch = 1f;
         ApplyPitch(1);
         score = 0;
         maxScore = 0;
         scoreText.text = score.ToString();
         intervalSlider.gameObject.SetActive(false);
-        targetPoses[0] = PoseIndex.Pistol;
-        targetPoses[1] = PoseIndex.OK;
+        targetPoses[0] = PoseIndex.OK;
+        targetPoses[1] = PoseIndex.Pistol;
+        UpdatePistol(false);
 
         if (action == ResultPanel.Action.Replay)
         {
@@ -133,7 +141,7 @@ public class AppController : MonoBehaviour
     {
         if (result.gestureIndex == GestureIndex.SnapFinger)
         {
-            if (gameStatus != GameStatus.waitingForStart && gameStatus != GameStatus.waitingForPose)
+            if (gameStatus != GameStatus.waitingForStart && gameStatus != GameStatus.waitingForPose && gameStatus != GameStatus.waitingForNext)
             {
                 sunglassImage.SetActive(!sunglassImage.activeSelf);
             }
@@ -179,6 +187,7 @@ public class AppController : MonoBehaviour
                 {
                     audioSource.PlayOneShot(pistolAudio);
                     gameStatus = GameStatus.waitingForPose;
+                    UpdatePistol(true);
                 }
                 else if (!playinJankenAudio)
                 {
@@ -203,6 +212,7 @@ public class AppController : MonoBehaviour
                         {
                             UpdateView(true);
                             Array.Reverse(targetPoses);
+                            UpdatePistol(false);
                             timer = 0;
                             pitch = Mathf.Min(pitch + 0.1f, 2f);
                             ApplyPitch(pitch);
@@ -212,6 +222,7 @@ public class AppController : MonoBehaviour
                     {
                         UpdateView(false);
                         Array.Reverse(targetPoses);
+                        UpdatePistol(false);
                         timer = 0;
                         pitch = Mathf.Min(pitch + 0.1f, 2f);
                         ApplyPitch(pitch);
@@ -311,6 +322,16 @@ public class AppController : MonoBehaviour
     {
         return leftPose == targetPoses[0] && rightPose == targetPoses[1];
     }
+
+    private void UpdatePistol(bool show)
+    {
+        for (int i = 0; i < pistolImages.Length; i++)
+        {
+            pistolImages[i].Show(show);
+            pistolImages[i].currentPose = targetPoses[i];
+        }
+    }
+
     private bool EvaluateJanken()
     {
         var result = false;

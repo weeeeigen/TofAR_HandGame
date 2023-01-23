@@ -24,9 +24,9 @@ public class SunGlass : MonoBehaviour
 
     private void FaceDetected(object sender)
     {
-        TofArFaceManager mgr = (TofArFaceManager)sender;
+        var manager = (TofArFaceManager)sender;
 
-        foreach (FaceResult fr in mgr.FaceData.Data.results)
+        foreach (FaceResult fr in manager.FaceData.Data.results)
         {
             faceResult = fr;
             break;
@@ -49,39 +49,34 @@ public class SunGlass : MonoBehaviour
 
         if (gameObject.activeSelf == true)
         {
-            // right eye
-            Vector3 rightEye = rot * (Vector3)vs[1107] + pos;
-            Vector3 leftEye = rot * (Vector3)vs[1163] + pos;
+            var rightEye = rot * (Vector3)vs[1107] + pos;
+            var leftEye = rot * (Vector3)vs[1163] + pos;
             var left = CalcCanvasPointFrom(rightEye);
             var right = CalcCanvasPointFrom(leftEye);
 
             rectTransform.anchoredPosition = (left + right) / 2;
             var distance = Vector2.Distance(left, right);
-            rectTransform.localScale = distance / 140 * Vector3.one;
+            rectTransform.localScale = distance / 150 * Vector3.one;
 
-            float rad = Mathf.Atan2(right.y - left.y, right.x - left.x);
+            var rad = Mathf.Atan2(right.y - left.y, right.x - left.x);
             rectTransform.rotation = Quaternion.Euler(0, 0, rad * Mathf.Rad2Deg);
         }
     }
 
 
-    private Vector2 CalcCanvasPointFrom(Vector3 handPoint)
+    private Vector2 CalcCanvasPointFrom(Vector3 facePoint)
     {
-        var viewPoint = tofCamera.WorldToViewportPoint(handPoint);
-        //print("ViewPoint: " + viewPoint.x + "," + viewPoint.y);
+        var viewPoint = tofCamera.WorldToViewportPoint(facePoint);
 
-        var handImagePoint = new Vector3(
+        var colorImagePoint = new Vector3(
             viewPoint.x * colorImageRect.sizeDelta.x,
             viewPoint.y * colorImageRect.sizeDelta.y,
             viewPoint.z
         ); 
-        //print("HandImagePoint: " + handImagePoint.x + "," + handImagePoint.y);
         var marginX = (colorImageRect.sizeDelta.x - canvasRect.sizeDelta.x) / 2;
         var marginY = (colorImageRect.sizeDelta.y - canvasRect.sizeDelta.y) / 2;
-        //print("Margin: " + marginX + "," + marginY);
-        var x = handImagePoint.x - marginX;
-        var y = handImagePoint.y - marginY;
-        //print("Point: " + x + "," + y);
+        var x = colorImagePoint.x - marginX;
+        var y = colorImagePoint.y - marginY;
         return new Vector2(x, y);
     }
 }
