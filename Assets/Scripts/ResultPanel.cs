@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Localization.SmartFormat.Extensions;
+using UnityEngine.Localization.SmartFormat.PersistentVariables;
 using TofAr.V0.Hand;
 
 public class ResultPanel : MonoBehaviour
@@ -87,7 +90,10 @@ public class ResultPanel : MonoBehaviour
 
     public void SetScore(int score)
     {
-        scoreText.text = score + "回成功！！";
+        //scoreText.text = score + "回成功！！";
+        var source = LocalizationSettings.StringDatabase.SmartFormatter.GetSourceExtension<PersistentVariablesSource>();
+        var s = source["global"]["score"] as IntVariable;  
+        s.Value = score; 
     }
 
     public void Show(bool show)

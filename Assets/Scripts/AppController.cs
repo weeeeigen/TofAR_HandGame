@@ -44,6 +44,10 @@ public class AppController : MonoBehaviour
     [SerializeField]
     private Text introText;
     [SerializeField]
+    private Text pistolIntroText;
+    [SerializeField]
+    private Text jankenIntroText;
+    [SerializeField]
     private GameObject introPanel;
     [SerializeField]
     private Text countdown;
@@ -92,10 +96,9 @@ public class AppController : MonoBehaviour
     private float timer = 0;
     private float pitch = 1.0f;
     
-    private const string initIntro = "スマホから70cmほど離れた状態で\n右手をピストル、左手をOKにしてください。\nもしくは両手をチョキにしてください。\nサングラスは指パッチンで非表示にできます。";
-    private const string pistolIntro = "弾を打つ音に合わせて\n右手と左手を入れ替えてください";
-    private const string jankenIntro = "画面に表示されるじゃんけんに合わせて\n負けるように手を出してください";
-
+    // private const string initIntro = "スマホから70cmほど離れた状態で\n右手をピストル、左手をOKにしてください。\nもしくは両手をチョキにしてください。\nサングラスは指パッチンで非表示にできます。";
+    // private const string pistolIntro = "弾を打つ音に合わせて\n右手と左手を入れ替えてください";
+    // private const string jankenIntro = "画面に表示されるじゃんけんに合わせて\n負けるように手を出してください";
 
 
     // Start is called before the first frame update
@@ -103,11 +106,12 @@ public class AppController : MonoBehaviour
     {
         resultPanel.actionDelegate += ResultPanelAction;
 
-        introText.text = initIntro;
+        //introText.text = initIntro;
+        UpdateIntro(true, false, false);
 
         UpdatePistol(false);
 
-        TofArHandManager.OnGestureEstimated += OnGestureEstimated;
+        TofArHandManager.OnGestureEstimated += OnGestureEstimated;     
     }
 
     private void ResultPanelAction(ResultPanel.Action action)
@@ -131,8 +135,9 @@ public class AppController : MonoBehaviour
         }
         else if (action == ResultPanel.Action.Close)
         {
-            introText.text = initIntro;
+            //introText.text = initIntro;
             introPanel.gameObject.SetActive(true);
+            UpdateIntro(true, false, false);
             gameStatus = GameStatus.waitingForInit;
         }
     }
@@ -273,12 +278,20 @@ public class AppController : MonoBehaviour
         TofArHandManager.Instance.HandData.GetPoseIndex(out leftPose, out rightPose);
     }
 
+    private void UpdateIntro(bool intro, bool pistol, bool janken)
+    {
+        introText.gameObject.SetActive(intro);
+        pistolIntroText.gameObject.SetActive(pistol);
+        jankenIntroText.gameObject.SetActive(janken);
+    }
+
     private bool endIntro = false;
     private IEnumerator StartIntroduction(int count)
     {
         gameStatus = GameStatus.waitingForCountdown;
-        introText.text = gameMode == GameMode.PistolBangBang ? pistolIntro : jankenIntro;
-        
+        //introText.text = gameMode == GameMode.PistolBangBang ? pistolIntro : jankenIntro;
+        UpdateIntro(false, gameMode == GameMode.PistolBangBang, gameMode == GameMode.JankenPonPon);
+
         yield return new WaitForSeconds(count);
         introPanel.gameObject.SetActive(false);
         endIntro = true;
